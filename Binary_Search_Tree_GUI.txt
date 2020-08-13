@@ -1,0 +1,150 @@
+#Importing all functions from tkinter module 
+from tkinter import *
+
+
+class Plot:
+    #Initializing the GUI components
+    def __init__(self,root,Width,Height,XPos,YPos):
+        self.root=root
+        self.Width=Width
+        self.Height=Height
+        self.XPos=XPos
+        self.YPos=YPos
+    
+    #Calculation of GUI components layout
+    def Calculation(self):   
+        self.Window_Size=(str(self.Width)+'x'+str(self.Height)+'+'
+                          +str(self.XPos)+'+'+str(self.YPos))
+        #self.Canvas_Var=(self.Width*self.Height)+self.XPos+self.YPos
+        self.Canvas_Var=30
+        
+    #Creating various GUI widget 
+    def GUI(self):
+        global CanvasDraw
+        global root1        
+        self.root1=None
+        
+        #Create Main Window
+        self.root.geometry(self.Window_Size)
+        self.root.title("Binary Search Tree")
+        
+        #Create Horizontal Scrollbar
+        hbar=Scrollbar(root,orient=HORIZONTAL)
+        hbar.pack(side=BOTTOM,fill=X)
+        
+        #Create Canvas Window
+        CanvasDraw=Canvas(root,bg='#FFFFFF',scrollregion=(0,0,self.Canvas_Var*100,self.Canvas_Var*100))
+        CanvasDraw.pack(padx=10,pady=10)
+        
+        #Configuring Canvas Window with Horizontal Scrollbar
+        hbar.config(command=CanvasDraw.xview)
+        
+        #Create Vertical Scrollbar
+        vbar=Scrollbar(root,orient=VERTICAL)
+        vbar.pack(side=RIGHT,fill=Y)
+        
+        #Configuring Canvas Window with Vertical Scrollbar
+        vbar.config(command=CanvasDraw.yview)              
+        
+        #Connecting Canvas Window to Scrollbars
+        CanvasDraw.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+        CanvasDraw.pack(side=LEFT,expand=True,fill=BOTH)
+        
+        #Create Button        
+        button = Button(CanvasDraw, 
+                   text="Insert Node",height=1, width="15",
+                   bd = '10',pady = 2, fg="white",bg = "darkblue",compound=LEFT,
+                   command=lambda:self.Insert_Node(entry1))
+        button.place(x =780,y = 50)
+        
+        #Create Entry Field
+        entry1 = Entry (root,width=20,bd =4)
+        entry1.place(x =790,y = 25)
+        
+    #Create Circle from create_oval function 
+    def Create_Circle(self,x, y, r, canvasName,res): #center coordinates, radius
+        x0 = x - r
+        y0 = y - r
+        x1 = x + r
+        y1 = y + r        
+        canvasName.create_oval(x0, y0, x1, y1,outline="#000000",width=5)
+        canvasName.create_text(x0+31,y0+30,text=res,font=("Helvetica", 16))
+        
+    #  Accept User Inputs  
+    def Insert_Node(self,entry1):
+        try:
+            data=int(entry1.get())
+            self.Not_Null=0             
+            self.root1=self.insert(self.root1,data,450,75)       
+            entry1.delete(0, END)
+        except ValueError:
+            pass
+    
+    #Create The Circle on Node Insertion
+    def add_circle(self,data,Posx,Posy):
+         self.Create_Circle(Posx,Posy,30,CanvasDraw,data)   
+            
+    #Insert The Entered Data Into Binary Search Tree and Disply The Same on GUI
+    def insert(self,root,data,Posx,Posy):                
+        if root==None :
+            self.add_circle(data,Posx,Posy)
+            return Node(data)
+        else:            
+            if data<=root.data:
+                if root.left==None:                    
+                    root.leftPosx=root.leftPosx-100
+                    root.leftPosy=root.leftPosy+100
+                
+                    #print(root.leftPosx,root.leftPosy)
+                    #print(data,root.data)
+                cur=self.insert(root.left,data,root.leftPosx,root.leftPosy)
+                root.left=cur                
+                self.addLine(root.leftPosx+100,root.leftPosy-100,root.leftPosx,root.leftPosy)
+                root.left.leftPosx=root.leftPosx
+                root.left.leftPosy=root.leftPosy
+                root.left.rightPosx=root.leftPosx
+                root.left.rightPosy=root.leftPosy                    
+                #print(root.left.rightPosx,root.left.rightPosy)
+                
+                
+            else:                
+                if root.right==None:                    
+                    root.rightPosx=root.rightPosx+100
+                    root.rightPosy=root.rightPosy+100
+                    self.addLine(root.rightPosx-100,root.rightPosy-100,root.rightPosx,root.rightPosy)
+                    #print(root.rightPosx,root.rightPosy)
+                    #print(data,root.data)
+                cur=self.insert(root.right,data,root.rightPosx,root.rightPosy)
+                root.right=cur
+                root.right.leftPosx=root.rightPosx
+                root.right.leftPosy=root.rightPosy
+                root.right.rightPosx=root.rightPosx
+                root.right.rightPosy=root.rightPosy
+                #print(root.right.rightPosx,root.right.rightPosy)
+                
+        return root      
+    #Insert The Line Between Nodes
+    def addLine(self,x1,y1,x2,y2):       
+        line=CanvasDraw.create_line(x1,y1+28,x2,y2-28,fill='black',width=5)
+
+#Node Creation    
+class Node:
+    def __init__(self,data):
+        self.right=self.left=None
+        self.rightPosx=self.leftPosx=int((950-50)/2)        
+        self.rightPosy=self.leftPosy=75  
+        self.data = data        
+
+# Create Instance of Tkinter
+root = Tk()
+
+#Setting Main Window Size and Position
+Width,Height,XPos,YPos=[950,650,220,15]
+#User Input for Window Size and Position
+#Width,Height,XPos,YPos=map(int,input().split())
+
+#Instance Creation 
+BST = Plot(root,Width,Height,XPos,YPos)
+BST.Calculation()
+BST.GUI()
+root.mainloop()    
