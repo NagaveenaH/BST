@@ -10,6 +10,7 @@ class Plot:
         self.Height=Height
         self.XPos=XPos
         self.YPos=YPos
+        self.count=0
     
     #Calculation of GUI components layout
     def Calculation(self):   
@@ -68,72 +69,100 @@ class Plot:
         x1 = x + r
         y1 = y + r        
         canvasName.create_oval(x0, y0, x1, y1,outline="#000000",width=5)
-        canvasName.create_text(x0+31,y0+30,text=res,font=("Helvetica", 16))
+        canvasName.create_text(x0+21,y0+20,text=res,font=("Helvetica", 10))
         
     #  Accept User Inputs  
     def Insert_Node(self,entry1):
         try:
             data=int(entry1.get())
-            self.Not_Null=0             
-            self.root1=self.insert(self.root1,data,450,75)       
+            self.count+=1
+            #print(self.count)
+            self.root1=self.insert(self.root1,data,450,75) 
+            self.levelOrder(self.root1,450,75)
             entry1.delete(0, END)
         except ValueError:
             pass
     
     #Create The Circle on Node Insertion
-    def add_circle(self,data,Posx,Posy):
-         self.Create_Circle(Posx,Posy,30,CanvasDraw,data)   
+    def add_circle(self,data,Posx,Posy):        
+         self.Create_Circle(Posx,Posy,20,CanvasDraw,data)
+         
+         
             
     #Insert The Entered Data Into Binary Search Tree and Disply The Same on GUI
     def insert(self,root,data,Posx,Posy):                
-        if root==None :
-            self.add_circle(data,Posx,Posy)
+        if root==None :            
             return Node(data)
-        else:            
+        else: 
+            
             if data<=root.data:
-                if root.left==None:                    
-                    root.leftPosx=root.leftPosx-100
-                    root.leftPosy=root.leftPosy+100
-                
-                    #print(root.leftPosx,root.leftPosy)
-                    #print(data,root.data)
-                cur=self.insert(root.left,data,root.leftPosx,root.leftPosy)
+                if root.left==None:                     
+                    root.x1=root.leftPosx-100
+                    root.y1=root.leftPosy+100                 
+                cur=self.insert(root.left,data,root.x1,root.y1)
                 root.left=cur                
-                self.addLine(root.leftPosx+100,root.leftPosy-100,root.leftPosx,root.leftPosy)
-                root.left.leftPosx=root.leftPosx
-                root.left.leftPosy=root.leftPosy
-                root.left.rightPosx=root.leftPosx
-                root.left.rightPosy=root.leftPosy                    
-                #print(root.left.rightPosx,root.left.rightPosy)
-                
+                root.left.leftPosx=root.x1
+                root.left.leftPosy=root.y1
+                root.left.rightPosx=root.x1
+                root.left.rightPosy=root.y1                                
                 
             else:                
-                if root.right==None:                    
-                    root.rightPosx=root.rightPosx+100
-                    root.rightPosy=root.rightPosy+100
-                    self.addLine(root.rightPosx-100,root.rightPosy-100,root.rightPosx,root.rightPosy)
-                    #print(root.rightPosx,root.rightPosy)
-                    #print(data,root.data)
-                cur=self.insert(root.right,data,root.rightPosx,root.rightPosy)
-                root.right=cur
-                root.right.leftPosx=root.rightPosx
-                root.right.leftPosy=root.rightPosy
-                root.right.rightPosx=root.rightPosx
-                root.right.rightPosy=root.rightPosy
-                #print(root.right.rightPosx,root.right.rightPosy)
+                if root.right==None:                   
+                    root.x2=root.rightPosx+100
+                    root.y2=root.rightPosy+100                       
+                cur=self.insert(root.right,data,root.x2,root.y2)
+                root.right=cur                
+                root.right.leftPosx=root.x2
+                root.right.leftPosy=root.y2
+                root.right.rightPosx=root.x2
+                root.right.rightPosy=root.y2
+                
                 
         return root      
     #Insert The Line Between Nodes
     def addLine(self,x1,y1,x2,y2):       
-        line=CanvasDraw.create_line(x1,y1+28,x2,y2-28,fill='black',width=5)
-
+        line=CanvasDraw.create_line(x1,y1+18,x2,y2-18,fill='black',width=5)
+        
+    def levelOrder(self,root,Posx,Posy):
+        #Write your code here
+        def getHeight(root):
+            if root is None:
+                return 0
+            else:
+                return max(getHeight(root.left),getHeight(root.right))+1
+        height= getHeight(root)
+        
+        
+        def printLevel(root,level):
+            if root is None:
+                return
+            if level==1:
+                print(root.data,end=' ')               
+                print(root.rightPosx,root.leftPosy)
+                self.add_circle(root.data,root.rightPosx,root.leftPosy)           
+                
+            elif level>1:                               
+                printLevel(root.left,level-1)                  
+                printLevel(root.right,level-1) 
+                if root.left!=None:
+                    self.addLine(root.rightPosx,root.leftPosy,root.rightPosx-100,root.leftPosy+100)                    
+                    
+                if root.right!=None:
+                    self.addLine(root.rightPosx,root.leftPosy,root.rightPosx+100,root.leftPosy+100)
+                    
+        CanvasDraw.delete("all")
+        for i in range(1,height+1):            
+            printLevel(root,i)
+        print()
+        
 #Node Creation    
 class Node:
     def __init__(self,data):
         self.right=self.left=None
         self.rightPosx=self.leftPosx=int((950-50)/2)        
         self.rightPosy=self.leftPosy=75  
-        self.data = data        
+        self.data = data 
+        self.x1=self.x2=self.y1=self.y2=0
 
 # Create Instance of Tkinter
 root = Tk()
